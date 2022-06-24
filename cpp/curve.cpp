@@ -17,8 +17,8 @@ int main(){
     BigInt a(p, 16);
     BigInt b = 1000000;
     BigInt c = 1;
-//    std::cout << a << std::endl;
+    std::cout << a.hex() << std::endl;
 //    std::cout << a + 1 << std::endl;
-    std::cout << c  << std::endl;
+//    std::cout << c  << std::endl;
     return 0;
 }

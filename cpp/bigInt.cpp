@@ -51,6 +51,34 @@ BigInt *BigInt::abs() {
     return this;
 }
 
+string BigInt::hex() {
+    std::vector<int> res;
+    res.push_back(0);
+
+    for (auto num : nums){
+        for (auto &j : res)
+            j *= base() * base();
+
+        res[0] += int(num);
+
+        for (int k = 0; k < res.size() - 1; k++) {
+            res[k + 1] += res[k] / 16;
+            res[k] = res[k] % 16;
+        }
+
+        while (res.back() >= 16) {
+            res.push_back(res.back() / 16);
+            res[res.size() - 2] = res[res.size() - 2] % 16;
+        }
+    }
+//    if (neg)
+//        out << "-";
+    string s;
+    for (auto it = res.rbegin(); it != res.rend(); ++it)
+        s += intToHex(*it);
+    return s;
+}
+
 
 BigInt BigInt::operator+(const BigInt& x) const {
     BigInt i = *this;
@@ -126,7 +154,7 @@ std::ostream &operator<<(std::ostream &out, BigInt const &a) {
         out << "-";
 
     for (auto it = res.rbegin(); it != res.rend(); ++it)
-        std::cout << *it;
+        out << *it;
     return out;
 }
 
@@ -140,4 +168,43 @@ int BigInt::hexToInt(char s) {
     else if (s >= 'A' && s <= 'F')
         num += s - 'A' + 10;
     return num;
+}
+
+char BigInt::intToHex(int i) {
+    switch (i){
+        case 0:
+            return '0';
+        case 1:
+            return '1';
+        case 2:
+            return '2';
+        case 3:
+            return '3';
+        case 4:
+            return '4';
+        case 5:
+            return '5';
+        case 6:
+            return '6';
+        case 7:
+            return '7';
+        case 8:
+            return '8';
+        case 9:
+            return '9';
+        case 10:
+            return 'A';
+        case 11:
+            return 'B';
+        case 12:
+            return 'C';
+        case 13:
+            return 'D';
+        case 14:
+            return 'E';
+        case 15:
+            return 'F';
+        default:
+            return '0';
+    }
 }

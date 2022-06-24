@@ -28,6 +28,7 @@ public:
     // Conversion func
     nat to_bits();
     BigInt* abs();
+    string hex();
 
     // Plus
     BigInt operator+(const BigInt&) const;
@@ -43,6 +44,7 @@ public:
 
     // static utils
     static int hexToInt(char);
+    char intToHex(int);
 
 protected:
     bool neg;
