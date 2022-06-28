@@ -71,9 +71,9 @@ string BigInt::hex() {
             res[res.size() - 2] = res[res.size() - 2] % 16;
         }
     }
-//    if (neg)
-//        out << "-";
     string s;
+    if (neg)
+        s += "-";
     for (auto it = res.rbegin(); it != res.rend(); ++it)
         s += intToHex(*it);
     return s;
@@ -129,13 +129,60 @@ BigInt& BigInt::operator+=(const long long& x) {
     return *this += i;
 }
 
+BigInt BigInt::operator-(const BigInt& x) const {
+    BigInt i = *this;
+    i -= x;
+    return i;
+}
+
+std::list<uint8_t> BigInt::_minus(const std::list<uint8_t>& a, const std::list<uint8_t>& b) {
+    std::list<uint8_t> new_nums = {};
+    auto it1 = a.rbegin();
+    auto it2 = b.rbegin();
+    int diff = 0;
+    while (it1 != a.rend() || it2 != b.rend()){
+
+        if (it1 != a.rend()){
+            diff += int(*it1);
+
+            ++ it1;
+        }
+        if (it2 != b.rend()){
+            diff -= int(*it2);
+            ++it2;
+        }
+        if (diff < 0){
+            new_nums.push_front(base() * base() + diff);
+            diff = -1;
+        } else {
+            new_nums.push_front(diff % (base() * base()));
+            diff = diff / base() / base();
+        }
+    }
+    if (diff < 0)
+        new_nums.front() = base() * base() - int(new_nums.front());
+    return new_nums;
+}
+
+BigInt& BigInt::operator-=(const BigInt& x) {
+    std::list<uint8_t> new_nums;
+    if (length() >= x.length())
+        new_nums = _minus(nums, x.nums);
+    else {
+        neg = true;
+        new_nums = _minus(x.nums, nums);
+    }
+    nums = new_nums;
+    return *this;
+}
+
 // 相当于将256进制的数转换为10进制
-std::ostream &operator<<(std::ostream &out, BigInt const &a) {
+std::ostream &operator<<(std::ostream &out, BigInt const &x) {
     std::vector<int> res;
     res.push_back(0);
-    for (auto num: a.nums) {
+    for (auto num: x.nums) {
         for (auto &j : res)
-            j *= a.base() * a.base();
+            j *= x.base() * x.base();
 
         res[0] += int(num);
 
@@ -150,7 +197,7 @@ std::ostream &operator<<(std::ostream &out, BigInt const &a) {
         }
     }
 
-    if (a.neg)
+    if (x.neg)
         out << "-";
 
     for (auto it = res.rbegin(); it != res.rend(); ++it)

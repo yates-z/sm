@@ -37,6 +37,8 @@ public:
     BigInt& operator+=(const long long&);
 
     // Subtraction :todo
+    BigInt operator-(const BigInt&) const;
+    BigInt& operator-=(const BigInt&);
 
     // Output
     friend std::ostream &operator<<(std::ostream &, BigInt const &);
@@ -45,6 +47,7 @@ public:
     // static utils
     static int hexToInt(char);
     char intToHex(int);
+    std::list<uint8_t> _minus(const std::list<uint8_t>& a, const std::list<uint8_t>& b);
 
 protected:
     bool neg;
