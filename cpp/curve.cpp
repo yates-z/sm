@@ -13,10 +13,10 @@ Curve::Curve(map <string, string> eccTable, string name, int bitSize) {
 
 
 int main(){
-    BigInt a("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF", 16);
-    BigInt b("F", 16);
+    BigInt a("8", 16);
+    BigInt b("-4", 16);
     BigInt c = 1;
-    std::cout << a - b << std::endl;
+    std::cout << a/b << " " << a <<" "<< b<< std::endl;
 //    std::cout << a + 1 << std::endl;
 //    std::cout << c  << std::endl;
     return 0;

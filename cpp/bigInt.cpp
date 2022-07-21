@@ -9,6 +9,8 @@ BigInt::BigInt(long long x)
         : neg(x < 0), _base(16) {
     if (x < 0)
         x = -x;
+    if (x == 0)
+        nums.push_back(0);
     while (x > 0){
         nums.push_front(x % (base() * base()));
         x = x / base() / base();
@@ -46,9 +48,17 @@ nat BigInt::to_bits() {
     return nums;
 }
 
-BigInt *BigInt::abs() {
+BigInt *BigInt::to_abs() {
     neg = false;
     return this;
+}
+
+BigInt BigInt::abs() const {
+    BigInt i;
+    i._base = _base;
+    i.neg = false;
+    i.nums = nums;
+    return i;
 }
 
 string BigInt::hex() {
@@ -87,7 +97,11 @@ BigInt BigInt::operator+(const BigInt& x) const {
 }
 
 BigInt& BigInt::operator+=(const BigInt& x) {
-    // :todo if i less than 0
+
+    if (neg && !x.neg){
+        *this = x - *this->to_abs();
+        return *this;
+    } else if (!neg && x.neg) return *this -= x.abs();
 
     auto it1 = nums.rbegin();
     auto it2 = x.nums.rbegin();
@@ -135,7 +149,7 @@ BigInt BigInt::operator-(const BigInt& x) const {
     return i;
 }
 
-std::list<uint8_t> BigInt::_minus(const std::list<uint8_t>& a, const std::list<uint8_t>& b) {
+std::list<uint8_t> BigInt::_subtract(const std::list<uint8_t>& a, const std::list<uint8_t>& b) {
     std::list<uint8_t> new_nums = {};
     auto it1 = a.rbegin();
     auto it2 = b.rbegin();
@@ -159,21 +173,169 @@ std::list<uint8_t> BigInt::_minus(const std::list<uint8_t>& a, const std::list<u
             diff = diff / base() / base();
         }
     }
-    if (diff < 0)
+    // 去除高位的0, 如果new_nums = {0} 则保留
+    while (new_nums.size() > 1) {
+        if (new_nums.front() == 0)
+            new_nums.pop_front();
+        else
+            break;
+    }
+    // 最高位用1/0表示正负
+    if (diff < 0){
         new_nums.front() = base() * base() - int(new_nums.front());
+        new_nums.push_front(0);
+    } else {
+        new_nums.push_front(1);
+    }
     return new_nums;
 }
 
 BigInt& BigInt::operator-=(const BigInt& x) {
-    std::list<uint8_t> new_nums;
-    if (length() >= x.length())
-        new_nums = _minus(nums, x.nums);
-    else {
+    if (neg && x.neg){
+        *this = x.abs() - *this->to_abs();
+        return *this;
+    } else if (neg && !x.neg){
+        *this = *this->to_abs() + x.abs();
         neg = true;
-        new_nums = _minus(x.nums, nums);
+        return *this;
+    }else if (!neg && x.neg) return *this += x.abs();
+
+    std::list<uint8_t> new_nums;
+
+    if (length() > x.length())
+        new_nums = _subtract(nums, x.nums);
+    else if (length() < x.length()) {
+        neg = true;
+        new_nums = _subtract(x.nums, nums);
+    } else {
+        new_nums = _subtract(nums, x.nums);
+        neg = new_nums.front() == 0;
     }
+    new_nums.pop_front();
     nums = new_nums;
     return *this;
+}
+
+BigInt BigInt::operator*(const BigInt& x) const {
+    BigInt i = *this;
+    i *= x;
+    return i;
+}
+
+std::list<uint8_t> BigInt::_multiply(const std::list<uint8_t> &a, const std::list<uint8_t> &b){
+    std::vector<long long> new_nums;
+    int count = 0;
+    for (auto it1 = a.rbegin(); it1!=a.rend(); ++it1){
+        int _count = count;
+        for (auto it2 = b.rbegin(); it2!=b.rend(); ++it2){
+            if (count == 0){
+                new_nums.push_back(int(*it1) *  int(*it2));
+            } else {
+                new_nums[_count] += int(*it1) *  int(*it2);
+            }
+            _count ++;
+        }
+        new_nums.push_back(0);
+        count++;
+    }
+    while (new_nums.back() == 0 && new_nums.size() > 1)
+        new_nums.pop_back();
+    for (int i=0; i < new_nums.size() -1; ++i){
+        new_nums[i + 1] += new_nums[i] / (base() * base());
+        new_nums[i] = new_nums[i] % (base() * base());
+    }
+    while (new_nums.back() >= base() * base()) {
+        new_nums.push_back(new_nums.back() / (base() * base()));
+        new_nums[new_nums.size() - 2] = new_nums[new_nums.size() - 2] % (base() * base());
+    }
+    std::list<uint8_t> _nums = {};
+    for (auto it=new_nums.rbegin(); it!=new_nums.rend(); ++it)
+        _nums.push_back(*it);
+    return _nums;
+}
+
+BigInt& BigInt::operator*=(const BigInt& x) {
+    std::list<uint8_t> new_nums;
+    if (length() >= x.length())
+        new_nums = _multiply(x.nums, nums);
+    else
+        new_nums = _multiply(nums, x.nums);
+    nums = new_nums;
+    neg = (!x.neg && neg) || (x.neg && !neg);
+    return *this;
+}
+
+BigInt BigInt::operator/(const BigInt& x) const {
+    BigInt i = *this;
+    i /= x;
+    return i;
+}
+
+BigInt& BigInt::operator/=(const BigInt& x) {
+    std::list<uint8_t> new_nums;
+    BigInt  dividend = this->abs();
+    BigInt divisor = x.abs();
+    if (dividend < divisor)
+    {
+        nums = {0};
+    } else {
+        BigInt tmp = 0;
+        while (dividend >= divisor){
+            dividend -= divisor;
+            tmp += 1;
+        }
+        nums = tmp.nums;
+
+    }
+    neg = (!x.neg && neg) || (x.neg && !neg);
+    return *this;
+}
+
+
+
+
+int BigInt::compare(const BigInt& x) const {
+    if (neg && !x.neg) return -1;
+    if (!neg && x.neg) return 1;
+    int check = -1;
+    if (!neg && !x.neg) check=1;
+    if (nums.size() > x.nums.size()) return check;
+    if (nums.size() < x.nums.size()) return -1 * check;
+    auto it1 = nums.begin();
+    auto it2 = x.nums.begin();
+    while(it1!=nums.end()){
+        if (*it1 > *it2) return check;
+        if (*it1 < *it2) return -1  * check;
+        ++it1;
+        ++it2;
+    }
+    return 0;
+}
+
+bool BigInt::operator<(const BigInt& x) const{
+    return compare(x) == -1;
+}
+
+bool BigInt::operator<=(const BigInt& x) const{
+    int compared = compare(x);
+    return compared == -1 || compared == 0;
+}
+
+bool BigInt::operator>(const BigInt& x) const{
+    return compare(x) == 1;
+}
+
+bool BigInt::operator>=(const BigInt& x) const{
+    int compared = compare(x);
+    return compared == 1 || compared == 0;
+}
+
+bool BigInt::operator==(const BigInt& x) const{
+    return compare(x) == 0;
+}
+
+bool BigInt::operator!=(const BigInt& x) const{
+    return !(*this == x);
 }
 
 // 相当于将256进制的数转换为10进制

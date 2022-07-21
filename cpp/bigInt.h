@@ -19,7 +19,7 @@ class BigInt
 {
 public:
     BigInt(long long);
-    explicit BigInt(string s="0", int base=10);
+    explicit BigInt(string s="0", int base=16);
 
     // Features
     int base() const;
@@ -27,7 +27,8 @@ public:
 
     // Conversion func
     nat to_bits();
-    BigInt* abs();
+    BigInt* to_abs();
+    BigInt abs() const;
     string hex();
 
     // Plus
@@ -36,9 +37,25 @@ public:
     BigInt operator+(const long long&) const;
     BigInt& operator+=(const long long&);
 
-    // Subtraction :todo
+    // Subtraction
     BigInt operator-(const BigInt&) const;
     BigInt& operator-=(const BigInt&);
+
+    // Multi
+    BigInt operator*(const BigInt&) const;
+    BigInt& operator*=(const BigInt&);
+
+    // div
+    BigInt operator/(const BigInt&) const;
+    BigInt& operator/=(const BigInt&);
+
+    // Compare
+    bool operator<(const BigInt&) const;
+    bool operator<=(const BigInt&) const;
+    bool operator>(const BigInt&) const;
+    bool operator>=(const BigInt&) const;
+    bool operator==(const BigInt&) const;
+    bool operator!=(const BigInt&) const;
 
     // Output
     friend std::ostream &operator<<(std::ostream &, BigInt const &);
@@ -46,8 +63,12 @@ public:
 
     // static utils
     static int hexToInt(char);
-    char intToHex(int);
-    std::list<uint8_t> _minus(const std::list<uint8_t>& a, const std::list<uint8_t>& b);
+    static char intToHex(int);
+
+private:
+    int compare(const BigInt&) const;
+    std::list<uint8_t> _subtract(const std::list<uint8_t>& a, const std::list<uint8_t>& b);
+    std::list<uint8_t> _multiply(const std::list<uint8_t>& a, const std::list<uint8_t>& b);
 
 protected:
     bool neg;
