@@ -13,10 +13,11 @@ Curve::Curve(map <string, string> eccTable, string name, int bitSize) {
 
 
 int main(){
-    BigInt a("FFF", 16);
-    BigInt b("F", 16);
-    BigInt c = 1;
-    std::cout << a*b << " " << a <<" "<< b<< std::endl;
+    BigInt a("-11", 10);
+    BigInt b("2", 10);
+//    BigInt c = a;
+
+    std::cout <<" "<< a % b << " "<<std::endl;
 //    std::cout << a + 1 << std::endl;
 //    std::cout << c  << std::endl;
     return 0;

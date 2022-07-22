@@ -55,6 +55,10 @@ public:
     BigInt operator/(const long long&) const;
     BigInt& operator/=(const long long&);
 
+    // mod
+    BigInt operator%(const BigInt&) const;
+    BigInt operator%=(const BigInt&);
+
     // Compare
     bool operator<(const BigInt&) const;
     bool operator<=(const BigInt&) const;

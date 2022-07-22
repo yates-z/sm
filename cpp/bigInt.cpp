@@ -18,12 +18,13 @@ BigInt::BigInt(long long x)
 }
 
 BigInt::BigInt(string s, int base)
-        : neg(s[0] == '-'), _base(base) {
+        : neg(s[0] == '-'), _base(16) {
     int size = s.length();
     int symbol = 0;
     if (s[0] == '-' || s[0] == '+') {
         symbol = 1;
     }
+
     for (int i = (size - 1); i >= symbol; i = i - 2) {
         // 低四位
         int n = hexToInt(s[i]);
@@ -31,6 +32,30 @@ BigInt::BigInt(string s, int base)
         if (i > 0)
             n += (hexToInt(s[i - 1]) * base);
         nums.push_front(n);
+    }
+    // 在初始化时强制转换为256进制
+    std::vector<int> res = {0};
+
+    for (auto num : nums){
+        for (auto &j : res)
+            j *= base * base;
+
+        res[0] += int(num);
+
+        for (int k = 0; k < res.size() - 1; k++) {
+            res[k + 1] += res[k] / _base / _base;
+            res[k] = res[k] % (_base * _base);
+        }
+
+        while (res.back() >= _base * _base) {
+            res.push_back(res.back() / _base / _base);
+            res[res.size() - 2] = res[res.size() - 2] % (_base * _base);
+        }
+    }
+    nums = {};
+    for (auto num: res){
+//        std::cout << num<< " ";
+        nums.push_front(num);
     }
 }
 
@@ -182,7 +207,7 @@ std::list<uint8_t> BigInt::_subtract(const std::list<uint8_t>& a, const std::lis
     }
     // 最高位用1/0表示正负
     if (diff < 0){
-        new_nums.front() = base() * base() - int(new_nums.front());
+//        new_nums.front() = base() * base() - int(new_nums.front());
         new_nums.push_front(0);
     } else {
         new_nums.push_front(1);
@@ -210,6 +235,7 @@ BigInt& BigInt::operator-=(const BigInt& x) {
     } else {
         new_nums = _subtract(nums, x.nums);
         neg = new_nums.front() == 0;
+        if (neg) new_nums = _subtract(x.nums, nums);
     }
     new_nums.pop_front();
     nums = new_nums;
@@ -296,15 +322,15 @@ BigInt BigInt::operator/(const BigInt& x) const {
 }
 
 BigInt& BigInt::operator/=(const BigInt& x) {
-    std::list<uint8_t> new_nums;
     BigInt  dividend = this->abs();
     BigInt divisor = x.abs();
+    if (divisor == 0)
+        throw std::exception("division by zero");
     if (dividend < divisor)
-    {
         nums = {0};
-    } else {
+    else {
         nat answer;
-        BigInt tmp = *this;
+        BigInt tmp;
         tmp.nums = {};
         for (auto num : dividend.nums){
             answer.push_back(0);
@@ -337,6 +363,17 @@ BigInt BigInt::operator/(const long long& x) const {
 BigInt& BigInt::operator/=(const long long& x) {
     BigInt i = x;
     return *this /= i;
+}
+
+BigInt BigInt::operator%(const BigInt& x) const {
+    BigInt i = *this;
+    i %= x;
+    return i;
+}
+
+BigInt BigInt::operator%=(const BigInt& x) {
+    *this -=  (*this / x) *x;
+    return *this;
 }
 
 
