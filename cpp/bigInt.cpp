@@ -279,13 +279,26 @@ BigInt& BigInt::operator/=(const BigInt& x) {
     {
         nums = {0};
     } else {
-        BigInt tmp = 0;
-        while (dividend >= divisor){
-            dividend -= divisor;
-            tmp += 1;
-        }
-        nums = tmp.nums;
+        nat answer;
+        BigInt tmp = *this;
+        tmp.nums = {};
+        for (auto num : dividend.nums){
+            answer.push_back(0);
+            tmp.nums.push_back(num);
+            while (tmp >= divisor){
+                tmp -= divisor;
+                answer.back() += 1;
+            }
 
+        }
+        // 删除高位的0
+        while (answer.size() > 1){
+            if (answer.front() == 0)
+                answer.pop_front();
+            else
+                break;
+        }
+        nums = answer;
     }
     neg = (!x.neg && neg) || (x.neg && !neg);
     return *this;
