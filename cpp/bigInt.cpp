@@ -216,6 +216,18 @@ BigInt& BigInt::operator-=(const BigInt& x) {
     return *this;
 }
 
+BigInt BigInt::operator-(const long long& x) const {
+    BigInt i = *this;
+    i -= x;
+    return i;
+}
+
+BigInt& BigInt::operator-=(const long long& x) {
+    BigInt i = x;
+    return *this -= i;
+}
+
+
 BigInt BigInt::operator*(const BigInt& x) const {
     BigInt i = *this;
     i *= x;
@@ -265,6 +277,18 @@ BigInt& BigInt::operator*=(const BigInt& x) {
     return *this;
 }
 
+
+BigInt BigInt::operator*(const long long& x) const {
+    BigInt i = *this;
+    i *= x;
+    return i;
+}
+
+BigInt& BigInt::operator*=(const long long& x) {
+    BigInt i = x;
+    return *this *= i;
+}
+
 BigInt BigInt::operator/(const BigInt& x) const {
     BigInt i = *this;
     i /= x;
@@ -304,7 +328,16 @@ BigInt& BigInt::operator/=(const BigInt& x) {
     return *this;
 }
 
+BigInt BigInt::operator/(const long long& x) const {
+    BigInt i = *this;
+    i /= x;
+    return i;
+}
 
+BigInt& BigInt::operator/=(const long long& x) {
+    BigInt i = x;
+    return *this /= i;
+}
 
 
 int BigInt::compare(const BigInt& x) const {

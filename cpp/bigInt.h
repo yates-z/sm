@@ -40,14 +40,20 @@ public:
     // Subtraction
     BigInt operator-(const BigInt&) const;
     BigInt& operator-=(const BigInt&);
+    BigInt operator-(const long long&) const;
+    BigInt& operator-=(const long long&);
 
     // Multi
     BigInt operator*(const BigInt&) const;
     BigInt& operator*=(const BigInt&);
+    BigInt operator*(const long long&) const;
+    BigInt& operator*=(const long long&);
 
     // div
     BigInt operator/(const BigInt&) const;
     BigInt& operator/=(const BigInt&);
+    BigInt operator/(const long long&) const;
+    BigInt& operator/=(const long long&);
 
     // Compare
     bool operator<(const BigInt&) const;
